@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reazyn — Logic Training Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3f9;
+    --surface: #ffffff;
+    --surface2: #ede9f6;
+    --border: #d9d3eb;
+    --accent: #6b45b8;
+    --accent2: #9270d8;
+    --accent-glow: rgba(107, 69, 184, 0.1);
+    --text: #1a1626;
+    --text-dim: #5a5270;
+    --text-dimmer: #9b93b0;
+    --green: #1a8a5a;
+    --red: #cc3333;
+    --nav-bg: rgba(245, 243, 249, 0.92);
+
+    /* Category accent colors */
+    --cat-deductive: #5b4fcf;
+    --cat-deductive-bg: rgba(91, 79, 207, 0.07);
+    --cat-inductive: #1a7a6e;
+    --cat-inductive-bg: rgba(26, 122, 110, 0.07);
+    --cat-abductive: #b85c1a;
+    --cat-abductive-bg: rgba(184, 92, 26, 0.07);
+    --cat-biases: #a0215a;
+    --cat-biases-bg: rgba(160, 33, 90, 0.07);
+    --cat-critical: #1a5fa0;
+    --cat-critical-bg: rgba(26, 95, 160, 0.07);
+  }
+
+  :root.dark {
+    --bg: #0f0e11;
+    --surface: #1a1820;
+    --surface2: #22202a;
+    --border: #2e2b38;
+    --accent: #c8b8ff;
+    --accent2: #7c5cbf;
+    --accent-glow: rgba(200, 184, 255, 0.15);
+    --text: #ede9f6;
+    --text-dim: #8b8499;
+    --text-dimmer: #4f4a5c;
+    --green: #6fefb8;
+    --red: #ff7b7b;
+    --nav-bg: rgba(15, 14, 17, 0.88);
+
+    --cat-deductive: #a89fff;
+    --cat-deductive-bg: rgba(168, 159, 255, 0.08);
+    --cat-inductive: #6fefcf;
+    --cat-inductive-bg: rgba(111, 239, 207, 0.08);
+    --cat-abductive: #ffb86f;
+    --cat-abductive-bg: rgba(255, 184, 111, 0.08);
+    --cat-biases: #ff82b8;
+    --cat-biases-bg: rgba(255, 130, 184, 0.08);
+    --cat-critical: #6fb8ff;
+    --cat-critical-bg: rgba(111, 184, 255, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+    background-image:
+      radial-gradient(ellipse 55% 35% at 75% -5%, rgba(146, 112, 216, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 35% 25% at 5% 85%, rgba(107, 69, 184, 0.06) 0%, transparent 55%);
+  }
+
+  :root.dark body {
+    background-image:
+      radial-gradient(ellipse 60% 40% at 70% -10%, rgba(124, 92, 191, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(200, 184, 255, 0.06) 0%, transparent 60%);
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 2rem;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: all 0.18s;
+  }
+
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: var(--accent-glow); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-left: auto;
+  }
+
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s;
+    font-size: 0.95rem;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent2);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* HERO */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem 2.5rem;
+    text-align: center;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* MAIN GRID */
+  .categories-wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 2rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* CATEGORY BLOCK */
+  .category-block {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.3s;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    padding: 1.3rem 1.8rem;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .category-header:hover {
+    background: var(--surface2);
+  }
+
+  .category-block.open .category-header {
+    border-bottom-color: var(--border);
+  }
+
+  .cat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .cat-info { flex: 1; }
+
+  .cat-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    line-height: 1.2;
+    margin-bottom: 0.2rem;
+  }
+
+  .cat-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .cat-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .cat-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dimmer);
+    letter-spacing: 0.05em;
+  }
+
+  .cat-chevron {
+    color: var(--text-dimmer);
+    font-size: 0.75rem;
+    transition: transform 0.25s ease;
+  }
+
+  .category-block.open .cat-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ITEMS GRID */
+  .category-items {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0;
+  }
+
+  .category-block.open .category-items {
+    display: grid;
+  }
+
+  .item-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.1rem 1.5rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .item-card:nth-child(n):last-child,
+  .item-card:nth-last-child(-n+5) {
+    border-bottom: none;
+  }
+
+  .item-card:hover {
+    background: var(--surface2);
+  }
+
+  .item-card.available:hover .item-name {
+    color: var(--accent);
+  }
+
+  .item-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.35;
+    transition: color 0.15s;
+  }
+
+  .item-sub {
+    font-size: 0.74rem;
+    color: var(--text-dimmer);
+    line-height: 1.4;
+  }
+
+  .item-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    width: fit-content;
+  }
+
+  .tag-available {
+    background: rgba(26, 138, 90, 0.1);
+    color: var(--green);
+  }
+
+  .tag-soon {
+    background: var(--surface2);
+    color: var(--text-dimmer);
+  }
+
+  /* Category color theming per block */
+  .cat-deductive .cat-icon { background: var(--cat-deductive-bg); color: var(--cat-deductive); }
+  .cat-deductive .cat-name { color: var(--cat-deductive); }
+  .cat-deductive.open { border-color: var(--cat-deductive); }
+
+  .cat-inductive .cat-icon { background: var(--cat-inductive-bg); color: var(--cat-inductive); }
+  .cat-inductive .cat-name { color: var(--cat-inductive); }
+  .cat-inductive.open { border-color: var(--cat-inductive); }
+
+  .cat-abductive .cat-icon { background: var(--cat-abductive-bg); color: var(--cat-abductive); }
+  .cat-abductive .cat-name { color: var(--cat-abductive); }
+  .cat-abductive.open { border-color: var(--cat-abductive); }
+
+  .cat-biases .cat-icon { background: var(--cat-biases-bg); color: var(--cat-biases); }
+  .cat-biases .cat-name { color: var(--cat-biases); }
+  .cat-biases.open { border-color: var(--cat-biases); }
+
+  .cat-critical .cat-icon { background: var(--cat-critical-bg); color: var(--cat-critical); }
+  .cat-critical .cat-name { color: var(--cat-critical); }
+  .cat-critical.open { border-color: var(--cat-critical); }
+
+  /* Divider line in hero */
+  .hero-divider {
+    width: 48px;
+    height: 2px;
+    background: var(--accent2);
+    margin: 0 auto 2rem;
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Reazyn</a>
+  <ul class="nav-links">
+    <li><a href="#" class="active">Play</a></li>
+    <li><a href="#">Learn</a></li>
+    <li><a href="#">Leaderboard</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    <div class="nav-user">
+      <div class="avatar">TU</div>
+      Test User
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-label">Logic Training Platform</div>
+  <h1 class="hero-title">Train your mind to<br><em>reason clearly.</em></h1>
+  <p class="hero-sub">Practice structured reasoning through rules of inference, cognitive bias recognition, and critical thinking exercises. Choose a category to begin.</p>
+  <div class="hero-divider"></div>
+</div>
+
+<div class="categories-wrap">
+
+  <!-- DEDUCTIVE LOGIC -->
+  <div class="category-block cat-deductive" id="cat-deductive">
+    <div class="category-header" onclick="toggleCat('cat-deductive')">
+      <div class="cat-icon">⊢</div>
+      <div class="cat-info">
+        <div class="cat-name">Deductive Logic</div>
+        <div class="cat-desc">If the premises are true, the conclusion must be true. Certainty through structure.</div>
+      </div>
+      <div class="cat-meta">
+        <span class="cat-count">5 rules</span>
+        <span class="cat-chevron">▼</span>
+      </div>
+    </div>
+    <div class="category-items">
+      <a href="https://daj0n.github.io/Reazyn/modusponens.html" class="item-card available">
+        <span class="item-name">Modus Ponens</span>
+        <span class="item-sub">If P then Q. P is true. Therefore Q.</span>
+        <span class="item-tag tag-available">● Live</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/modustollens.html" class="item-card">
+        <span class="item-name">Modus Tollens</span>
+        <span class="item-sub">If P then Q. Q is false. Therefore P is false.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/hypotheticalsyllogism.html" class="item-card">
+        <span class="item-name">Hypothetical Syllogism</span>
+        <span class="item-sub">If P then Q. If Q then R. Therefore if P then R.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/disjunctivesyllogism.html" class="item-card">
+        <span class="item-name">Disjunctive Syllogism</span>
+        <span class="item-sub">P or Q. Not P. Therefore Q.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/constructivedilemma.html" class="item-card">
+        <span class="item-name">Constructive Dilemma</span>
+        <span class="item-sub">Two conditionals with a disjunctive premise lead to a disjunctive conclusion.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- INDUCTIVE LOGIC -->
+  <div class="category-block cat-inductive" id="cat-inductive">
+    <div class="category-header" onclick="toggleCat('cat-inductive')">
+      <div class="cat-icon">∴</div>
+      <div class="cat-info">
+        <div class="cat-name">Inductive Logic</div>
+        <div class="cat-desc">Patterns and evidence support probable conclusions. Strong but not certain.</div>
+      </div>
+      <div class="cat-meta">
+        <span class="cat-count">5 rules</span>
+        <span class="cat-chevron">▼</span>
+      </div>
+    </div>
+    <div class="category-items">
+      <a href="https://daj0n.github.io/Reazyn/enumerativeinduction.html" class="item-card">
+        <span class="item-name">Enumerative Induction</span>
+        <span class="item-sub">Observed instances of a pattern support a general rule.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/statisticalgeneralization.html" class="item-card">
+        <span class="item-name">Statistical Generalization</span>
+        <span class="item-sub">A sample's properties are extended to the broader population.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/analogicalreasoning.html" class="item-card">
+        <span class="item-name">Analogical Reasoning</span>
+        <span class="item-sub">Because A and B share traits, B likely shares another trait of A.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/causalinference.html" class="item-card">
+        <span class="item-name">Causal Inference</span>
+        <span class="item-sub">Correlation with controls supports a causal relationship.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/inductiveanalogy.html" class="item-card">
+        <span class="item-name">Inductive Analogy</span>
+        <span class="item-sub">Past cases that match predict outcomes for a new similar case.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ABDUCTIVE LOGIC -->
+  <div class="category-block cat-abductive" id="cat-abductive">
+    <div class="category-header" onclick="toggleCat('cat-abductive')">
+      <div class="cat-icon">◈</div>
+      <div class="cat-info">
+        <div class="cat-name">Abductive Logic</div>
+        <div class="cat-desc">Reason to the best available explanation given incomplete information.</div>
+      </div>
+      <div class="cat-meta">
+        <span class="cat-count">5 rules</span>
+        <span class="cat-chevron">▼</span>
+      </div>
+    </div>
+    <div class="category-items">
+      <a href="https://daj0n.github.io/Reazyn/inferencetobestexplanation.html" class="item-card">
+        <span class="item-name">Inference to Best Explanation</span>
+        <span class="item-sub">Among competing explanations, the most coherent one is likely correct.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/diagnosticreasoning.html" class="item-card">
+        <span class="item-name">Diagnostic Reasoning</span>
+        <span class="item-sub">Symptoms narrow down the most probable underlying cause.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/occamsrazor.html" class="item-card">
+        <span class="item-name">Occam's Razor</span>
+        <span class="item-sub">The simplest explanation that fits all evidence is preferred.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/hypothesisranking.html" class="item-card">
+        <span class="item-name">Hypothesis Ranking</span>
+        <span class="item-sub">Rank explanations by fit, scope, and simplicity against evidence.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/retroductiveinference.html" class="item-card">
+        <span class="item-name">Retroductive Inference</span>
+        <span class="item-sub">Working backward from an observed result to its most likely cause.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- BIASES & FALLACIES -->
+  <div class="category-block cat-biases" id="cat-biases">
+    <div class="category-header" onclick="toggleCat('cat-biases')">
+      <div class="cat-icon">⚠</div>
+      <div class="cat-info">
+        <div class="cat-name">Biases &amp; Fallacies</div>
+        <div class="cat-desc">Recognize the patterns that distort reasoning — in others and in yourself.</div>
+      </div>
+      <div class="cat-meta">
+        <span class="cat-count">5 biases</span>
+        <span class="cat-chevron">▼</span>
+      </div>
+    </div>
+    <div class="category-items">
+      <a href="https://daj0n.github.io/Reazyn/confirmationbias.html" class="item-card">
+        <span class="item-name">Confirmation Bias</span>
+        <span class="item-sub">Favoring information that confirms what you already believe.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/anchoring.html" class="item-card">
+        <span class="item-name">Anchoring Bias</span>
+        <span class="item-sub">Over-relying on the first piece of information encountered.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/availabilityheuristic.html" class="item-card">
+        <span class="item-name">Availability Heuristic</span>
+        <span class="item-sub">Judging likelihood by how easily examples come to mind.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/dunningkruger.html" class="item-card">
+        <span class="item-name">Dunning-Kruger Effect</span>
+        <span class="item-sub">Low competence paired with inflated confidence in one's ability.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/strawman.html" class="item-card">
+        <span class="item-name">Straw Man Fallacy</span>
+        <span class="item-sub">Misrepresenting someone's argument to make it easier to refute.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- CRITICAL THINKING -->
+  <div class="category-block cat-critical" id="cat-critical">
+    <div class="category-header" onclick="toggleCat('cat-critical')">
+      <div class="cat-icon">◎</div>
+      <div class="cat-info">
+        <div class="cat-name">Critical Thinking</div>
+        <div class="cat-desc">Applied reasoning across complex, real-world scenarios. Game modes instead of rules.</div>
+      </div>
+      <div class="cat-meta">
+        <span class="cat-count">5 modes</span>
+        <span class="cat-chevron">▼</span>
+      </div>
+    </div>
+    <div class="category-items">
+      <a href="https://daj0n.github.io/Reazyn/conclusionspotting.html" class="item-card">
+        <span class="item-name">Conclusion Spotting</span>
+        <span class="item-sub">Read an argument and identify what its actual conclusion is.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/assumptionhunting.html" class="item-card">
+        <span class="item-name">Assumption Hunting</span>
+        <span class="item-sub">Identify the hidden assumptions an argument depends on.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/weakpointfinder.html" class="item-card">
+        <span class="item-name">Weak Point Finder</span>
+        <span class="item-sub">Locate the most vulnerable step in a chain of reasoning.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/counterargumentbuilder.html" class="item-card">
+        <span class="item-name">Counterargument Builder</span>
+        <span class="item-sub">Construct the strongest possible objection to a given position.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+      <a href="https://daj0n.github.io/Reazyn/evidenceweighing.html" class="item-card">
+        <span class="item-name">Evidence Weighing</span>
+        <span class="item-sub">Judge which pieces of evidence best support a conclusion.</span>
+        <span class="item-tag tag-soon">Coming Soon</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleCat(id) {
+    const block = document.getElementById(id);
+    block.classList.toggle('open');
+  }
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const btn = document.getElementById('theme-toggle');
+    const isDark = root.classList.toggle('dark');
+    btn.textContent = isDark ? '🌙' : '☀️';
+  }
+
+  // Open Deductive by default to show Modus Ponens is live
+  toggleCat('cat-deductive');
+</script>
+</body>
+</html>
