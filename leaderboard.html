@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard — Reazyn</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3f9;
+    --surface: #ffffff;
+    --surface2: #ede9f6;
+    --border: #d9d3eb;
+    --accent: #6b45b8;
+    --accent2: #9270d8;
+    --accent-glow: rgba(107, 69, 184, 0.1);
+    --text: #1a1626;
+    --text-dim: #5a5270;
+    --text-dimmer: #9b93b0;
+    --green: #1a8a5a;
+    --red: #cc3333;
+    --nav-bg: rgba(245, 243, 249, 0.92);
+    --gold: #b8860b;
+    --gold-bg: rgba(184, 134, 11, 0.08);
+    --gold-border: rgba(184, 134, 11, 0.25);
+    --silver: #6b7280;
+    --silver-bg: rgba(107, 114, 128, 0.07);
+    --bronze: #92400e;
+    --bronze-bg: rgba(146, 64, 14, 0.07);
+  }
+
+  :root.dark {
+    --bg: #0f0e11;
+    --surface: #1a1820;
+    --surface2: #22202a;
+    --border: #2e2b38;
+    --accent: #c8b8ff;
+    --accent2: #7c5cbf;
+    --accent-glow: rgba(200, 184, 255, 0.15);
+    --text: #ede9f6;
+    --text-dim: #8b8499;
+    --text-dimmer: #4f4a5c;
+    --green: #6fefb8;
+    --red: #ff7b7b;
+    --nav-bg: rgba(15, 14, 17, 0.88);
+    --gold: #f0c040;
+    --gold-bg: rgba(240, 192, 64, 0.08);
+    --gold-border: rgba(240, 192, 64, 0.25);
+    --silver: #a0aec0;
+    --silver-bg: rgba(160, 174, 192, 0.07);
+    --bronze: #c87941;
+    --bronze-bg: rgba(200, 121, 65, 0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+    background-image:
+      radial-gradient(ellipse 55% 35% at 75% -5%, rgba(146, 112, 216, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 35% 25% at 5% 85%, rgba(107, 69, 184, 0.06) 0%, transparent 55%);
+  }
+
+  :root.dark body {
+    background-image:
+      radial-gradient(ellipse 60% 40% at 70% -10%, rgba(124, 92, 191, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(200, 184, 255, 0.06) 0%, transparent 60%);
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 2rem;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: all 0.18s;
+  }
+
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: var(--accent-glow); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-left: auto;
+  }
+
+  .theme-toggle {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    font-size: 0.95rem;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent2); color: var(--accent); background: var(--accent-glow); }
+
+  .nav-user {
+    display: flex; align-items: center; gap: 0.55rem;
+    font-size: 0.85rem; color: var(--text-dim); font-weight: 500;
+  }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.68rem; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 5rem;
+  }
+
+  /* HEADER */
+  .page-header {
+    margin-bottom: 2.8rem;
+  }
+
+  .page-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 0.6rem;
+  }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-sub {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.8rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.38rem 0.9rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :root.dark .filter-btn.active { color: var(--bg); }
+
+  /* PODIUM */
+  .podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 1rem 0;
+  }
+
+  .podium-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    max-width: 180px;
+  }
+
+  .podium-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 700;
+    border: 2px solid transparent;
+    position: relative;
+  }
+
+  .podium-avatar.rank-1 {
+    width: 64px; height: 64px;
+    font-size: 1.3rem;
+    background: var(--gold-bg);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .podium-avatar.rank-2 {
+    background: var(--silver-bg);
+    border-color: var(--silver);
+    color: var(--silver);
+  }
+
+  .podium-avatar.rank-3 {
+    background: var(--bronze-bg);
+    border-color: var(--bronze);
+    color: var(--bronze);
+  }
+
+  .podium-crown {
+    position: absolute;
+    top: -18px;
+    font-size: 1.1rem;
+  }
+
+  .podium-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .podium-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+
+  .podium-stand {
+    border-radius: 8px 8px 0 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    padding: 0.6rem 0;
+  }
+
+  .podium-slot:nth-child(1) .podium-stand { /* 2nd place */
+    height: 70px;
+    background: var(--silver-bg);
+    border: 1px solid var(--silver);
+    border-bottom: none;
+    color: var(--silver);
+  }
+
+  .podium-slot:nth-child(2) .podium-stand { /* 1st place */
+    height: 100px;
+    background: var(--gold-bg);
+    border: 1px solid var(--gold);
+    border-bottom: none;
+    color: var(--gold);
+  }
+
+  .podium-slot:nth-child(3) .podium-stand { /* 3rd place */
+    height: 50px;
+    background: var(--bronze-bg);
+    border: 1px solid var(--bronze);
+    border-bottom: none;
+    color: var(--bronze);
+  }
+
+  /* TABLE */
+  .leaderboard-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 56px 1fr 110px 110px 90px;
+    padding: 0.7rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+  }
+
+  .th.right { text-align: right; }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 110px 110px 90px;
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.15s;
+  }
+
+  .table-row:last-child { border-bottom: none; }
+  .table-row:hover { background: var(--surface2); }
+
+  .table-row.is-first {
+    background: var(--gold-bg);
+    border-left: 3px solid var(--gold);
+  }
+
+  .table-row.is-first:hover { background: var(--gold-bg); filter: brightness(0.97); }
+
+  .rank-cell {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-dimmer);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .rank-medal { font-size: 1rem; }
+
+  .player-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .player-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .player-info { display: flex; flex-direction: column; gap: 0.1rem; }
+
+  .player-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .player-title {
+    font-size: 0.72rem;
+    color: var(--text-dimmer);
+  }
+
+  .score-cell {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text);
+    text-align: right;
+  }
+
+  .accuracy-cell {
+    text-align: right;
+  }
+
+  .accuracy-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .streak-cell {
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  /* Avatar color palette */
+  .av-1  { background: rgba(107,69,184,0.15); color: #6b45b8; }
+  .av-2  { background: rgba(26,122,110,0.13); color: #1a7a6e; }
+  .av-3  { background: rgba(184,92,26,0.13);  color: #b85c1a; }
+  .av-4  { background: rgba(160,33,90,0.12);  color: #a0215a; }
+  .av-5  { background: rgba(26,95,160,0.12);  color: #1a5fa0; }
+  .av-6  { background: rgba(60,140,60,0.12);  color: #2a7a2a; }
+  .av-7  { background: rgba(130,60,160,0.12); color: #823ca0; }
+  .av-8  { background: rgba(20,100,140,0.12); color: #14648c; }
+  .av-9  { background: rgba(160,100,20,0.12); color: #a06414; }
+  .av-10 { background: rgba(100,30,30,0.12);  color: #641e1e; }
+
+  :root.dark .av-1  { background: rgba(200,184,255,0.1); color: #c8b8ff; }
+  :root.dark .av-2  { background: rgba(111,239,207,0.1); color: #6fefcf; }
+  :root.dark .av-3  { background: rgba(255,184,111,0.1); color: #ffb86f; }
+  :root.dark .av-4  { background: rgba(255,130,184,0.1); color: #ff82b8; }
+  :root.dark .av-5  { background: rgba(111,184,255,0.1); color: #6fb8ff; }
+  :root.dark .av-6  { background: rgba(111,239,150,0.1); color: #6fef96; }
+  :root.dark .av-7  { background: rgba(220,150,255,0.1); color: #dc96ff; }
+  :root.dark .av-8  { background: rgba(80,200,230,0.1);  color: #50c8e6; }
+  :root.dark .av-9  { background: rgba(255,210,80,0.1);  color: #ffd250; }
+  :root.dark .av-10 { background: rgba(255,120,120,0.1); color: #ff7878; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.3rem;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Reazyn</a>
+  <ul class="nav-links">
+    <li><a href="#">Play</a></li>
+    <li><a href="#">Learn</a></li>
+    <li><a href="#" class="active">Leaderboard</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    <div class="nav-user">
+      <div class="avatar">TU</div>
+      Test User
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="page-label">Rankings · All Time</div>
+    <h1 class="page-title">Leaderboard</h1>
+    <p class="page-sub">Top reasoners ranked by total score across all categories.</p>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total Players</div>
+      <div class="stat-value">2,841</div>
+      <div class="stat-sub">across all categories</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Questions Answered</div>
+      <div class="stat-value">148k</div>
+      <div class="stat-sub">platform wide</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Top Score</div>
+      <div class="stat-value">9,840</div>
+      <div class="stat-sub">held by L</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-btn active">All Time</button>
+    <button class="filter-btn">This Week</button>
+    <button class="filter-btn">Today</button>
+    <button class="filter-btn" style="margin-left:auto;">Deductive</button>
+    <button class="filter-btn">Inductive</button>
+    <button class="filter-btn">Abductive</button>
+    <button class="filter-btn">Biases</button>
+    <button class="filter-btn">Critical</button>
+  </div>
+
+  <!-- PODIUM (top 3) -->
+  <div class="podium">
+    <!-- 2nd -->
+    <div class="podium-slot">
+      <div class="podium-avatar rank-2">M</div>
+      <div class="podium-name">Marcus</div>
+      <div class="podium-score">8,210 pts</div>
+      <div class="podium-stand">2</div>
+    </div>
+    <!-- 1st -->
+    <div class="podium-slot">
+      <div class="podium-avatar rank-1">
+        <span class="podium-crown">👑</span>
+        L
+      </div>
+      <div class="podium-name">L</div>
+      <div class="podium-score">9,840 pts</div>
+      <div class="podium-stand">1</div>
+    </div>
+    <!-- 3rd -->
+    <div class="podium-slot">
+      <div class="podium-avatar rank-3">S</div>
+      <div class="podium-name">Sasha</div>
+      <div class="podium-score">7,955 pts</div>
+      <div class="podium-stand">3</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="leaderboard-table">
+    <div class="table-header">
+      <div class="th">Rank</div>
+      <div class="th">Player</div>
+      <div class="th right">Score</div>
+      <div class="th right">Accuracy</div>
+      <div class="th right">Streak</div>
+    </div>
+
+    <!-- Row 1 — L -->
+    <div class="table-row is-first">
+      <div class="rank-cell"><span class="rank-medal">🥇</span></div>
+      <div class="player-cell">
+        <div class="player-avatar av-1">L</div>
+        <div class="player-info">
+          <span class="player-name">L</span>
+          <span class="player-title">Wammy's House</span>
+        </div>
+      </div>
+      <div class="score-cell">9,840</div>
+      <div class="accuracy-cell"><span class="accuracy-val">97.4%</span></div>
+      <div class="streak-cell">🔥 34</div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="table-row">
+      <div class="rank-cell"><span class="rank-medal">🥈</span></div>
+      <div class="player-cell">
+        <div class="player-avatar av-2">M</div>
+        <div class="player-info">
+          <span class="player-name">Marcus</span>
+          <span class="player-title">IHIQS</span>
+        </div>
+      </div>
+      <div class="score-cell">8,210</div>
+      <div class="accuracy-cell"><span class="accuracy-val">91.2%</span></div>
+      <div class="streak-cell">🔥 18</div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="table-row">
+      <div class="rank-cell"><span class="rank-medal">🥉</span></div>
+      <div class="player-cell">
+        <div class="player-avatar av-3">S</div>
+        <div class="player-info">
+          <span class="player-name">Sasha</span>
+          <span class="player-title">University of California</span>
+        </div>
+      </div>
+      <div class="score-cell">7,955</div>
+      <div class="accuracy-cell"><span class="accuracy-val">89.7%</span></div>
+      <div class="streak-cell">🔥 11</div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">4</div>
+      <div class="player-cell">
+        <div class="player-avatar av-4">N</div>
+        <div class="player-info">
+          <span class="player-name">Nadia</span>
+          <span class="player-title">Mensa</span>
+        </div>
+      </div>
+      <div class="score-cell">7,340</div>
+      <div class="accuracy-cell"><span class="accuracy-val">87.3%</span></div>
+      <div class="streak-cell">— 0</div>
+    </div>
+
+    <!-- Row 5 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">5</div>
+      <div class="player-cell">
+        <div class="player-avatar av-5">T</div>
+        <div class="player-info">
+          <span class="player-name">Theo</span>
+          <span class="player-title">Lowell High School</span>
+        </div>
+      </div>
+      <div class="score-cell">6,880</div>
+      <div class="accuracy-cell"><span class="accuracy-val">85.9%</span></div>
+      <div class="streak-cell">🔥 7</div>
+    </div>
+
+    <!-- Row 6 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">6</div>
+      <div class="player-cell">
+        <div class="player-avatar av-6">P</div>
+        <div class="player-info">
+          <span class="player-name">Priya</span>
+          <span class="player-title">Mensa</span>
+        </div>
+      </div>
+      <div class="score-cell">6,415</div>
+      <div class="accuracy-cell"><span class="accuracy-val">84.1%</span></div>
+      <div class="streak-cell">🔥 5</div>
+    </div>
+
+    <!-- Row 7 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">7</div>
+      <div class="player-cell">
+        <div class="player-avatar av-7">J</div>
+        <div class="player-info">
+          <span class="player-name">Jordan</span>
+          <span class="player-title"></span>
+        </div>
+      </div>
+      <div class="score-cell">5,970</div>
+      <div class="accuracy-cell"><span class="accuracy-val">81.6%</span></div>
+      <div class="streak-cell">— 0</div>
+    </div>
+
+    <!-- Row 8 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">8</div>
+      <div class="player-cell">
+        <div class="player-avatar av-8">E</div>
+        <div class="player-info">
+          <span class="player-name">Elena</span>
+          <span class="player-title">University of California</span>
+        </div>
+      </div>
+      <div class="score-cell">5,530</div>
+      <div class="accuracy-cell"><span class="accuracy-val">79.8%</span></div>
+      <div class="streak-cell">🔥 3</div>
+    </div>
+
+    <!-- Row 9 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">9</div>
+      <div class="player-cell">
+        <div class="player-avatar av-9">C</div>
+        <div class="player-info">
+          <span class="player-name">Carlos</span>
+          <span class="player-title"></span>
+        </div>
+      </div>
+      <div class="score-cell">4,890</div>
+      <div class="accuracy-cell"><span class="accuracy-val">76.2%</span></div>
+      <div class="streak-cell">— 0</div>
+    </div>
+
+    <!-- Row 10 -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">10</div>
+      <div class="player-cell">
+        <div class="player-avatar av-10">A</div>
+        <div class="player-info">
+          <span class="player-name">Amara</span>
+          <span class="player-title">IHIQS</span>
+        </div>
+      </div>
+      <div class="score-cell">4,210</div>
+      <div class="accuracy-cell"><span class="accuracy-val">73.5%</span></div>
+      <div class="streak-cell">🔥 2</div>
+    </div>
+
+    <!-- Row 11 — placeholder -->
+    <div class="table-row">
+      <div class="rank-cell" style="color:var(--text-dimmer);">11</div>
+      <div class="player-cell">
+        <div class="player-avatar av-1" style="opacity:0.35;">?</div>
+        <div class="player-info">
+          <span class="player-name" style="color:var(--text-dimmer); font-style:italic;">Name here</span>
+          <span class="player-title" style="font-style:italic;">Affiliation here</span>
+        </div>
+      </div>
+      <div class="score-cell" style="color:var(--text-dimmer);">—</div>
+      <div class="accuracy-cell"><span class="accuracy-val" style="color:var(--text-dimmer);">—</span></div>
+      <div class="streak-cell" style="color:var(--text-dimmer);">— 0</div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function toggleTheme() {
+    const root = document.documentElement;
+    const btn = document.getElementById('theme-toggle');
+    const isDark = root.classList.toggle('dark');
+    btn.textContent = isDark ? '🌙' : '☀️';
+  }
+
+  // Filter button toggle (UI only for MVP)
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const siblings = btn.parentElement.querySelectorAll('.filter-btn');
+      siblings.forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
