@@ -396,7 +396,208 @@
   .cat-critical .cat-name { color: var(--cat-critical); }
   .cat-critical.open { border-color: var(--cat-critical); }
 
-  /* Divider line in hero */
+  /* SUB-CATEGORY BLOCK */
+  .sub-categories {
+    display: none;
+    flex-direction: column;
+  }
+
+  .category-block.open .sub-categories {
+    display: flex;
+  }
+
+  .sub-block {
+    border-top: 1px solid var(--border);
+  }
+
+  .sub-header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.9rem 1.8rem 0.9rem 2.4rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .sub-header:hover { background: var(--surface2); }
+
+  .sub-symbol {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--cat-deductive);
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .sub-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .sub-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dimmer);
+    letter-spacing: 0.05em;
+  }
+
+  .sub-chevron {
+    color: var(--text-dimmer);
+    font-size: 0.65rem;
+    transition: transform 0.2s ease;
+  }
+
+  .sub-block.open .sub-chevron { transform: rotate(180deg); }
+
+  .sub-items {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    border-top: 1px solid var(--border);
+  }
+
+  .sub-block.open .sub-items { display: grid; }
+
+  .sub-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.9rem 1.5rem 0.9rem 2.8rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+
+  .sub-item:last-child { border-right: none; }
+  .sub-block:last-child .sub-item { border-bottom: none; }
+  .sub-item:hover { background: var(--surface2); }
+  .sub-item.available:hover .sub-item-name { color: var(--accent); }
+
+  .sub-item-name {
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1.3;
+    transition: color 0.15s;
+  }
+
+  .sub-item-desc {
+    font-size: 0.72rem;
+    color: var(--text-dimmer);
+    line-height: 1.35;
+  }
+
+  .sub-item-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+    padding: 0.18rem 0.45rem;
+    border-radius: 4px;
+    width: fit-content;
+  }
+
+  /* PROFILE DROPDOWN */
+  .nav-user {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .nav-user:hover, .nav-user.open {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+
+  .profile-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 200;
+    overflow: hidden;
+    animation: dropIn 0.18s ease forwards;
+  }
+
+  :root.dark .profile-dropdown {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .nav-user.open .profile-dropdown { display: block; }
+
+  .dropdown-header {
+    padding: 0.9rem 1rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dropdown-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .dropdown-handle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dimmer);
+    margin-top: 0.15rem;
+  }
+
+  .dropdown-items { padding: 0.4rem 0; }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    text-decoration: none;
+  }
+
+  .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+
+  .dropdown-item.signout {
+    border-top: 1px solid var(--border);
+    margin-top: 0.3rem;
+    color: var(--red);
+  }
+
+  .dropdown-item.signout:hover { background: rgba(204,51,51,0.06); color: var(--red); }
+
+  .dropdown-icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
   .hero-divider {
     width: 48px;
     height: 2px;
@@ -412,15 +613,28 @@
 <nav>
   <a class="nav-brand" href="#">Reazyn</a>
   <ul class="nav-links">
-    <li><a href="#" class="active">Play</a></li>
-    <li><a href="#">Learn</a></li>
+    <li><a href="https://daj0n.github.io/Reazyn/index.html" class="active">Play</a></li>
+    <li><a href="https://daj0n.github.io/Reazyn/learn.html">Learn</a></li>
+    <li><a href="https://daj0n.github.io/Reazyn/community.html">Community</a></li>
     <li><a href="https://daj0n.github.io/Reazyn/leaderboard.html">Leaderboard</a></li>
   </ul>
   <div class="nav-right">
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
-    <div class="nav-user">
+    <div class="nav-user" id="nav-user" onclick="toggleProfile(event)">
       <div class="avatar">TU</div>
       Test User
+      <div class="profile-dropdown" id="profile-dropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-name">Test User</div>
+          <div class="dropdown-handle">@testuser</div>
+        </div>
+        <div class="dropdown-items">
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👤</span> Profile</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👥</span> Friends</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">💬</span> Chats</a>
+          <a href="#" class="dropdown-item signout"><span class="dropdown-icon">↩</span> Sign out</a>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -443,38 +657,194 @@
         <div class="cat-desc">If the premises are true, the conclusion must be true. Certainty through structure.</div>
       </div>
       <div class="cat-meta">
-        <span class="cat-count">5 rules</span>
+        <span class="cat-count">7 topics · 17 rules</span>
         <span class="cat-chevron">▼</span>
       </div>
     </div>
-    <div class="category-items">
-      <a href="https://daj0n.github.io/Reazyn/modusponens.html" class="item-card available">
-        <span class="item-name">Modus Ponens</span>
-        <span class="item-sub">If P then Q. P is true. Therefore Q.</span>
-        <span class="item-tag tag-available">● Live</span>
-      </a>
-      <a href="https://daj0n.github.io/Reazyn/modustollens.html" class="item-card">
-        <span class="item-name">Modus Tollens</span>
-        <span class="item-sub">If P then Q. Q is false. Therefore P is false.</span>
-        <span class="item-tag tag-soon">Coming Soon</span>
-      </a>
-      <a href="https://daj0n.github.io/Reazyn/hypotheticalsyllogism.html" class="item-card">
-        <span class="item-name">Hypothetical Syllogism</span>
-        <span class="item-sub">If P then Q. If Q then R. Therefore if P then R.</span>
-        <span class="item-tag tag-soon">Coming Soon</span>
-      </a>
-      <a href="https://daj0n.github.io/Reazyn/disjunctivesyllogism.html" class="item-card">
-        <span class="item-name">Disjunctive Syllogism</span>
-        <span class="item-sub">P or Q. Not P. Therefore Q.</span>
-        <span class="item-tag tag-soon">Coming Soon</span>
-      </a>
-      <a href="https://daj0n.github.io/Reazyn/constructivedilemma.html" class="item-card">
-        <span class="item-name">Constructive Dilemma</span>
-        <span class="item-sub">Two conditionals with a disjunctive premise lead to a disjunctive conclusion.</span>
-        <span class="item-tag tag-soon">Coming Soon</span>
-      </a>
-    </div>
-  </div>
+
+    <div class="sub-categories">
+
+      <!-- Conjunction -->
+      <div class="sub-block" id="sub-conjunction">
+        <div class="sub-header" onclick="toggleSub('sub-conjunction')">
+          <span class="sub-symbol">∧</span>
+          <span class="sub-name">Conjunction</span>
+          <span class="sub-count">2 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/conjunctionintroduction.html" class="sub-item">
+            <span class="sub-item-name">Conjunction Introduction</span>
+            <span class="sub-item-desc">P is true. Q is true. Therefore P and Q.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/conjunctionelimination.html" class="sub-item">
+            <span class="sub-item-name">Conjunction Elimination</span>
+            <span class="sub-item-desc">P and Q are true. Therefore P (or Q) alone is true.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Negation -->
+      <div class="sub-block" id="sub-negation">
+        <div class="sub-header" onclick="toggleSub('sub-negation')">
+          <span class="sub-symbol">¬</span>
+          <span class="sub-name">Negation</span>
+          <span class="sub-count">2 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/doublenegation.html" class="sub-item">
+            <span class="sub-item-name">Double Negation</span>
+            <span class="sub-item-desc">Not-not-P is equivalent to P.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/reductioabsurdum.html" class="sub-item">
+            <span class="sub-item-name">Reductio ad Absurdum</span>
+            <span class="sub-item-desc">Assuming P leads to contradiction, so P must be false.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Disjunction -->
+      <div class="sub-block" id="sub-disjunction">
+        <div class="sub-header" onclick="toggleSub('sub-disjunction')">
+          <span class="sub-symbol">∨</span>
+          <span class="sub-name">Disjunction</span>
+          <span class="sub-count">2 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/disjunctivesyllogism.html" class="sub-item">
+            <span class="sub-item-name">Disjunctive Syllogism</span>
+            <span class="sub-item-desc">P or Q. Not P. Therefore Q.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/disjunctionintroduction.html" class="sub-item">
+            <span class="sub-item-name">Disjunction Introduction</span>
+            <span class="sub-item-desc">P is true. Therefore P or Q must be true.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Grouping -->
+      <div class="sub-block" id="sub-grouping">
+        <div class="sub-header" onclick="toggleSub('sub-grouping')">
+          <span class="sub-symbol">( )</span>
+          <span class="sub-name">Grouping</span>
+          <span class="sub-count">3 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/association.html" class="sub-item">
+            <span class="sub-item-name">Association</span>
+            <span class="sub-item-desc">Regrouping terms within conjunctions or disjunctions.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/commutativity.html" class="sub-item">
+            <span class="sub-item-name">Commutativity</span>
+            <span class="sub-item-desc">Order of terms in a conjunction or disjunction doesn't change truth.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/distribution.html" class="sub-item">
+            <span class="sub-item-name">Distribution</span>
+            <span class="sub-item-desc">Expanding a conjunction across a disjunction or vice versa.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Truth-Functions -->
+      <div class="sub-block" id="sub-truthfunctions">
+        <div class="sub-header" onclick="toggleSub('sub-truthfunctions')">
+          <span class="sub-symbol">T/F</span>
+          <span class="sub-name">Truth-Functions</span>
+          <span class="sub-count">3 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/truthtable.html" class="sub-item">
+            <span class="sub-item-name">Truth Table Construction</span>
+            <span class="sub-item-desc">Map all possible truth values of a compound statement.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/tautology.html" class="sub-item">
+            <span class="sub-item-name">Tautology Recognition</span>
+            <span class="sub-item-desc">Identify statements that are true under all interpretations.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/contradiction.html" class="sub-item">
+            <span class="sub-item-name">Contradiction Recognition</span>
+            <span class="sub-item-desc">Identify statements that are false under all interpretations.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Conditional -->
+      <div class="sub-block" id="sub-conditional">
+        <div class="sub-header" onclick="toggleSub('sub-conditional')">
+          <span class="sub-symbol">→</span>
+          <span class="sub-name">Conditional</span>
+          <span class="sub-count">4 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/modusponens.html" class="sub-item available">
+            <span class="sub-item-name">Modus Ponens</span>
+            <span class="sub-item-desc">If P then Q. P is true. Therefore Q.</span>
+            <span class="sub-item-tag tag-available">● Live</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/modustollens.html" class="sub-item">
+            <span class="sub-item-name">Modus Tollens</span>
+            <span class="sub-item-desc">If P then Q. Q is false. Therefore P is false.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/hypotheticalsyllogism.html" class="sub-item">
+            <span class="sub-item-name">Hypothetical Syllogism</span>
+            <span class="sub-item-desc">If P then Q. If Q then R. Therefore if P then R.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/exportation.html" class="sub-item">
+            <span class="sub-item-name">Exportation</span>
+            <span class="sub-item-desc">If P and Q then R, is equivalent to if P then if Q then R.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Biconditional -->
+      <div class="sub-block" id="sub-biconditional">
+        <div class="sub-header" onclick="toggleSub('sub-biconditional')">
+          <span class="sub-symbol">↔</span>
+          <span class="sub-name">Biconditional</span>
+          <span class="sub-count">3 rules</span>
+          <span class="sub-chevron">▼</span>
+        </div>
+        <div class="sub-items">
+          <a href="https://daj0n.github.io/Reazyn/biconditionalintroduction.html" class="sub-item">
+            <span class="sub-item-name">Biconditional Introduction</span>
+            <span class="sub-item-desc">If P then Q, and if Q then P. Therefore P if and only if Q.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/biconditionalelimination.html" class="sub-item">
+            <span class="sub-item-name">Biconditional Elimination</span>
+            <span class="sub-item-desc">P ↔ Q means both P→Q and Q→P hold simultaneously.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+          <a href="https://daj0n.github.io/Reazyn/equivalence.html" class="sub-item">
+            <span class="sub-item-name">Equivalence</span>
+            <span class="sub-item-desc">Two statements with identical truth values under all conditions.</span>
+            <span class="sub-item-tag tag-soon">Coming Soon</span>
+          </a>
+        </div>
+      </div>
+
+    </div><!-- end sub-categories -->
+  </div><!-- end cat-deductive -->
 
   <!-- INDUCTIVE LOGIC -->
   <div class="category-block cat-inductive" id="cat-inductive">
@@ -647,7 +1017,22 @@
 </div>
 
 <script>
+  function toggleProfile(e) {
+    e.stopPropagation();
+    document.getElementById('nav-user').classList.toggle('open');
+  }
+
+  // Close dropdown when clicking anywhere else
+  document.addEventListener('click', () => {
+    document.getElementById('nav-user').classList.remove('open');
+  });
+
   function toggleCat(id) {
+    const block = document.getElementById(id);
+    block.classList.toggle('open');
+  }
+
+  function toggleSub(id) {
     const block = document.getElementById(id);
     block.classList.toggle('open');
   }
@@ -659,8 +1044,9 @@
     btn.textContent = isDark ? '🌙' : '☀️';
   }
 
-  // Open Deductive by default to show Modus Ponens is live
+  // Open Deductive and Conditional by default so Modus Ponens is immediately visible
   toggleCat('cat-deductive');
+  toggleSub('sub-conditional');
 </script>
 </body>
 </html>
