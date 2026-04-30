@@ -483,6 +483,97 @@
     color: var(--text-dim);
     margin-top: 0.2rem;
   }
+  /* PROFILE DROPDOWN */
+  .nav-user {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .nav-user:hover, .nav-user.open {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+
+  .profile-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 200;
+    overflow: hidden;
+    animation: dropIn 0.18s ease forwards;
+  }
+
+  :root.dark .profile-dropdown { box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .nav-user.open .profile-dropdown { display: block; }
+
+  .dropdown-header {
+    padding: 0.9rem 1rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dropdown-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .dropdown-handle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dimmer);
+    margin-top: 0.15rem;
+  }
+
+  .dropdown-items { padding: 0.4rem 0; }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    text-decoration: none;
+  }
+
+  .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+
+  .dropdown-item.signout {
+    border-top: 1px solid var(--border);
+    margin-top: 0.3rem;
+    color: var(--red);
+  }
+
+  .dropdown-item.signout:hover { background: rgba(204,51,51,0.06); color: var(--red); }
+
+  .dropdown-icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
 </style>
 </head>
 <body>
@@ -490,15 +581,28 @@
 <nav>
   <a class="nav-brand" href="#">Reazyn</a>
   <ul class="nav-links">
-    <li><a href="https://daj0n.github.io/Reazyn/index.html">Play</a></li>
+    <li><a href="#">Play</a></li>
     <li><a href="#">Learn</a></li>
+    <li><a href="#">Community</a></li>
     <li><a href="#" class="active">Leaderboard</a></li>
   </ul>
   <div class="nav-right">
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
-    <div class="nav-user">
+    <div class="nav-user" id="nav-user" onclick="toggleProfile(event)">
       <div class="avatar">TU</div>
       Test User
+      <div class="profile-dropdown" id="profile-dropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-name">Test User</div>
+          <div class="dropdown-handle">@testuser</div>
+        </div>
+        <div class="dropdown-items">
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👤</span> Profile</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👥</span> Friends</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">💬</span> Chats</a>
+          <a href="#" class="dropdown-item signout"><span class="dropdown-icon">↩</span> Sign out</a>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -754,6 +858,15 @@
     const isDark = root.classList.toggle('dark');
     btn.textContent = isDark ? '🌙' : '☀️';
   }
+
+  function toggleProfile(e) {
+    e.stopPropagation();
+    document.getElementById('nav-user').classList.toggle('open');
+  }
+
+  document.addEventListener('click', () => {
+    document.getElementById('nav-user').classList.remove('open');
+  });
 
   // Filter button toggle (UI only for MVP)
   document.querySelectorAll('.filter-btn').forEach(btn => {
