@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reazyn — Conjunction Elimination</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e11;
+    --surface: #1a1820;
+    --surface2: #22202a;
+    --border: #2e2b38;
+    --accent: #c8b8ff;
+    --accent2: #7c5cbf;
+    --accent-glow: rgba(200, 184, 255, 0.15);
+    --text: #ede9f6;
+    --text-dim: #8b8499;
+    --text-dimmer: #4f4a5c;
+    --green: #6fefb8;
+    --red: #ff7b7b;
+    --correct-bg: rgba(111, 239, 184, 0.08);
+    --wrong-bg: rgba(255, 123, 123, 0.08);
+    --nav-bg: rgba(15, 14, 17, 0.85);
+  }
+
+  :root.light {
+    --bg: #f5f3f9;
+    --surface: #ffffff;
+    --surface2: #ede9f6;
+    --border: #d9d3eb;
+    --accent: #6b45b8;
+    --accent2: #9270d8;
+    --accent-glow: rgba(107, 69, 184, 0.1);
+    --text: #1a1626;
+    --text-dim: #5a5270;
+    --text-dimmer: #9b93b0;
+    --green: #1a8a5a;
+    --red: #cc3333;
+    --correct-bg: rgba(26, 138, 90, 0.08);
+    --wrong-bg: rgba(204, 51, 51, 0.08);
+    --nav-bg: rgba(245, 243, 249, 0.9);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 70% -10%, rgba(124, 92, 191, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(200, 184, 255, 0.06) 0%, transparent 60%);
+  }
+
+  :root.light body {
+    background-image:
+      radial-gradient(ellipse 60% 40% at 70% -10%, rgba(146, 112, 216, 0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(107, 69, 184, 0.05) 0%, transparent 60%);
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 2rem;
+  }
+
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: all 0.18s;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: var(--accent-glow); }
+
+  .nav-right { display: flex; align-items: center; gap: 0.6rem; margin-left: auto; }
+
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    flex-shrink: 0; font-size: 1rem;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent2); color: var(--accent); background: var(--accent-glow); }
+
+  .nav-user {
+    position: relative;
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.85rem; color: var(--text-dim); font-weight: 500;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .nav-user:hover, .nav-user.open { background: var(--surface2); border-color: var(--border); }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 600;
+    color: var(--bg); flex-shrink: 0;
+  }
+
+  .profile-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px); right: 0;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 200; overflow: hidden;
+    animation: dropIn 0.18s ease forwards;
+  }
+
+  :root:not(.light) .profile-dropdown { box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .nav-user.open .profile-dropdown { display: block; }
+  .dropdown-header { padding: 0.9rem 1rem 0.7rem; border-bottom: 1px solid var(--border); }
+  .dropdown-name { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .dropdown-handle { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-dimmer); margin-top: 0.15rem; }
+  .dropdown-items { padding: 0.4rem 0; }
+
+  .dropdown-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem; color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    text-decoration: none;
+  }
+
+  .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+  .dropdown-item.signout { border-top: 1px solid var(--border); margin-top: 0.3rem; color: var(--red); }
+  .dropdown-item.signout:hover { background: rgba(204,51,51,0.06); color: var(--red); }
+  .dropdown-icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+  .section-header { margin-bottom: 2.5rem; }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; color: var(--text); line-height: 1.2;
+  }
+
+  .section-desc {
+    margin-top: 0.7rem; color: var(--text-dim);
+    font-size: 0.9rem; line-height: 1.65; max-width: 540px;
+  }
+
+  .progress-bar-wrap { margin-bottom: 2.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; color: var(--text-dimmer);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem; margin-bottom: 1.2rem;
+    animation: fadeUp 0.35s ease forwards; opacity: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 1.2rem;
+  }
+
+  .premises { margin-bottom: 1.5rem; }
+  .premise { display: flex; gap: 0.9rem; align-items: baseline; margin-bottom: 0.7rem; }
+
+  .premise-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; color: var(--text-dimmer);
+    min-width: 3.5rem; flex-shrink: 0;
+  }
+
+  .premise-text { font-size: 0.95rem; color: var(--text); line-height: 1.55; font-weight: 400; }
+
+  .premise-text em {
+    font-style: italic; color: var(--accent);
+    font-family: 'DM Serif Display', serif; font-size: 1.05em;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 1.3rem 0; }
+  .question-label { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 1rem; font-weight: 500; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1rem 1.2rem; border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer; text-align: left;
+    transition: all 0.18s; color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; line-height: 1.5; width: 100%;
+  }
+
+  .option-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--accent-glow); transform: translateY(-1px); }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { border-color: var(--green); background: var(--correct-bg); color: var(--green); }
+  .option-btn.wrong { border-color: var(--red); background: var(--wrong-bg); color: var(--red); opacity: 0.7; }
+  .option-btn.dimmed { opacity: 0.4; }
+
+  .option-letter {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    min-width: 1.4rem; height: 1.4rem; border-radius: 4px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px; transition: all 0.18s;
+  }
+
+  .option-btn.correct .option-letter { background: var(--green); color: var(--bg); }
+  .option-btn.wrong .option-letter { background: var(--red); color: var(--bg); }
+
+  .feedback {
+    margin-top: 1.2rem; padding: 1rem 1.2rem;
+    border-radius: 10px; font-size: 0.88rem; line-height: 1.6;
+    display: none; animation: fadeUp 0.25s ease forwards;
+  }
+
+  .feedback.correct {
+    background: var(--correct-bg);
+    border: 1px solid rgba(111, 239, 184, 0.2);
+    color: #a0f5d4; display: block;
+  }
+
+  :root.light .feedback.correct { color: var(--green); border-color: rgba(26, 138, 90, 0.25); }
+
+  .feedback.wrong {
+    background: var(--wrong-bg);
+    border: 1px solid rgba(255, 123, 123, 0.2);
+    color: #ffb0b0; display: block;
+  }
+
+  .feedback strong { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+
+  .next-btn {
+    margin-top: 1.5rem; padding: 0.75rem 1.8rem;
+    border-radius: 8px; background: var(--accent); color: var(--bg);
+    border: none; font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    display: none; transition: all 0.18s; letter-spacing: 0.02em;
+  }
+
+  .next-btn:hover { background: #ddd0ff; transform: translateY(-1px); }
+  .next-btn.visible { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+  .score-screen { text-align: center; padding: 3rem 2rem; animation: fadeUp 0.4s ease forwards; opacity: 0; }
+  .score-emoji { font-size: 3rem; margin-bottom: 1rem; }
+
+  .score-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem; color: var(--accent); line-height: 1; margin-bottom: 0.5rem;
+  }
+
+  .score-label { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .score-detail {
+    display: inline-flex; gap: 2rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.2rem 2rem; margin-bottom: 2rem;
+  }
+
+  .score-stat { text-align: center; }
+  .score-stat-num { font-family: 'DM Mono', monospace; font-size: 1.3rem; font-weight: 500; }
+  .score-stat-num.g { color: var(--green); }
+  .score-stat-num.r { color: var(--red); }
+  .score-stat-label { font-size: 0.75rem; color: var(--text-dimmer); margin-top: 0.2rem; }
+
+  .restart-btn {
+    padding: 0.8rem 2.2rem; border-radius: 8px;
+    background: var(--accent); color: var(--bg); border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.18s;
+  }
+
+  .restart-btn:hover { background: #ddd0ff; }
+
+  .rule-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 8px; padding: 0.9rem 1.2rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.83rem; color: var(--text-dim); line-height: 1.6;
+  }
+
+  .rule-box strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.08em;
+    color: var(--accent2); text-transform: uppercase;
+    display: block; margin-bottom: 0.35rem;
+  }
+
+  .rule-box code { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+
+  nav, .card, .option-btn, .rule-box, .score-detail, .feedback,
+  .next-btn, .restart-btn, .progress-bar, .theme-toggle {
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="https://daj0n.github.io/Reazyn/index.html">Reazyn</a>
+  <ul class="nav-links">
+    <li><a href="https://daj0n.github.io/Reazyn/index.html" class="active">Play</a></li>
+    <li><a href="#">Learn</a></li>
+    <li><a href="#">Community</a></li>
+    <li><a href="https://daj0n.github.io/Reazyn/leaderboard.html">Leaderboard</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    <div class="nav-user" id="nav-user" onclick="toggleProfile(event)">
+      <div class="avatar">TU</div>
+      Test User
+      <div class="profile-dropdown" id="profile-dropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-name">Test User</div>
+          <div class="dropdown-handle">@testuser</div>
+        </div>
+        <div class="dropdown-items">
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👤</span> Profile</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👥</span> Friends</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">💬</span> Chats</a>
+          <a href="#" class="dropdown-item signout"><span class="dropdown-icon">↩</span> Sign out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="section-header">
+    <h1 class="section-title">Conjunction Elimination</h1>
+    <p class="section-desc">When a compound conjunction is known to be true, each of its components can be extracted and used independently. Also called Simplification — you are not removing truth, you are isolating it.</p>
+  </div>
+
+  <div class="rule-box">
+    <strong>The Rule</strong>
+    If <code>P ∧ Q</code> is true, then <code>P</code> is true, and <code>Q</code> is true — each on their own. From a compound conjunction, you can extract either conjunct independently. For grouped conjunctions like <code>(P ∧ Q) ∧ R</code>, you can eliminate outward first, then inward.
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span id="progress-text">Question 1 of 10</span>
+      <span id="score-text">Score: 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="question-area"></div>
+</main>
+
+<script>
+const problems = [
+  {
+    tag: "Abstract · Formal Logic",
+    premises: [
+      { label: "Given", text: "<em>P ∧ Q</em> is true." }
+    ],
+    question: "What can we extract from this conjunction?",
+    options: [
+      { letter: "A", text: "P alone is true, and separately Q alone is true.", correct: true },
+      { letter: "B", text: "P is true only if Q is also mentioned in the conclusion.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. Conjunction Elimination lets us extract either conjunct independently. From P ∧ Q, we can assert P on its own, or Q on its own — each is a fully valid separate conclusion.",
+      wrong: "The conjuncts are independent. Once P ∧ Q is established, P stands on its own without any reference to Q, and vice versa. There is no dependency between them in the conclusion."
+    }
+  },
+  {
+    tag: "Abstract · Formal Logic",
+    premises: [
+      { label: "Given", text: "<em>P ∧ Q</em> is true." }
+    ],
+    question: "A student says: 'I can conclude Q, but not P, because P came first in the conjunction.' Is the student correct?",
+    options: [
+      { letter: "A", text: "Yes — the left conjunct has priority.", correct: false },
+      { letter: "B", text: "No — both P and Q can be extracted independently. Order does not matter.", correct: true }
+    ],
+    feedback: {
+      correct: "Correct. Conjunction Elimination applies symmetrically to both conjuncts. There is no priority based on position. P ∧ Q licenses the extraction of P, of Q, or both — in any order.",
+      wrong: "There is no such rule in logic. Position within a conjunction carries no logical weight. Both conjuncts are equally available for extraction, and order does not create priority."
+    }
+  },
+  {
+    tag: "Abstract · Grouping",
+    premises: [
+      { label: "Given", text: "<em>(P ∧ Q) ∧ R</em> is true." }
+    ],
+    question: "What can we conclude in a single step of Conjunction Elimination?",
+    options: [
+      { letter: "A", text: "P ∧ Q is true, and separately R is true.", correct: true },
+      { letter: "B", text: "P, Q, and R are all immediately available as three separate conclusions in one step.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. The outermost conjunction is between (P ∧ Q) and R. A single application of Conjunction Elimination extracts these two components: the group (P ∧ Q) and the individual R. To get P and Q separately, you apply the rule again to (P ∧ Q).",
+      wrong: "Each application of Conjunction Elimination peels one layer. From (P ∧ Q) ∧ R, one step gives you (P ∧ Q) and R. A second step on (P ∧ Q) then gives you P and Q. You cannot skip layers in a single application."
+    }
+  },
+  {
+    tag: "Abstract · Grouping",
+    premises: [
+      { label: "Given", text: "<em>(P ∧ Q) ∧ R</em> is true." }
+    ],
+    question: "After two applications of Conjunction Elimination, what individual statements are available?",
+    options: [
+      { letter: "A", text: "Only R, since it was the last conjunct added.", correct: false },
+      { letter: "B", text: "P, Q, and R are all available as individual statements.", correct: true }
+    ],
+    feedback: {
+      correct: "Correct. First elimination: (P ∧ Q) and R. Second elimination applied to (P ∧ Q): P and Q. After two steps, all three — P, Q, and R — are available as independent statements.",
+      wrong: "Elimination works inward through the grouping. The order in which conjuncts were introduced has no bearing on which ones can be extracted. All components of a true conjunction are available."
+    }
+  },
+  {
+    tag: "Everyday Reasoning",
+    premises: [
+      { label: "Known", text: "The package has arrived and the recipient has been notified." }
+    ],
+    question: "What individual facts can we now use separately?",
+    options: [
+      { letter: "A", text: "The package has arrived. Also separately: the recipient has been notified.", correct: true },
+      { letter: "B", text: "We can only say the package arrived — the notification is implied, not stated.", correct: false }
+    ],
+    feedback: {
+      correct: "Exactly. The compound statement is a conjunction of two facts. Conjunction Elimination lets us isolate each one: the package arriving is a standalone fact, and the recipient being notified is a separate standalone fact.",
+      wrong: "Both components are explicitly stated in the conjunction. Conjunction Elimination extracts what is directly there — nothing is merely implied. Both facts are equally available for independent use."
+    }
+  },
+  {
+    tag: "Medical Reasoning",
+    premises: [
+      { label: "Chart note", text: "The patient has elevated blood pressure and is currently on anticoagulants." }
+    ],
+    question: "A cardiologist needs to assess blood pressure separately from medication status. What does Conjunction Elimination allow?",
+    options: [
+      { letter: "A", text: "The elevated blood pressure can be treated as a standalone clinical fact.", correct: true },
+      { letter: "B", text: "The blood pressure cannot be assessed independently without also referencing the medication.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. The chart note is a conjunction of two independent clinical facts. Conjunction Elimination allows the cardiologist to extract either one on its own. Elevated blood pressure stands as a standalone finding regardless of the medication status.",
+      wrong: "Conjunction Elimination specifically licenses independent use of each conjunct. The two facts do not depend on each other for their truth. Either can be extracted and used in isolation."
+    }
+  },
+  {
+    tag: "Legal Reasoning",
+    premises: [
+      { label: "Established", text: "The defendant was at the scene and the defendant's fingerprints were found on the weapon." }
+    ],
+    question: "The defense attorney wants to challenge only the fingerprint evidence. What does Conjunction Elimination allow the court to do?",
+    options: [
+      { letter: "A", text: "Isolate the fingerprint claim as a standalone fact subject to independent scrutiny.", correct: true },
+      { letter: "B", text: "The fingerprint claim cannot be separated — both facts must be challenged together.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. The compound claim is a conjunction of two independently established facts. Conjunction Elimination allows either one to be extracted and examined on its own. The fingerprint evidence stands as a separate claim that can be challenged independently.",
+      wrong: "There is no rule requiring conjuncts to be challenged together. Conjunction Elimination exists precisely to allow independent treatment of each component of a compound claim."
+    }
+  },
+  {
+    tag: "Abstract · Chained Elimination",
+    premises: [
+      { label: "Given", text: "<em>((P ∧ Q) ∧ R) ∧ S</em> is true." }
+    ],
+    question: "How many applications of Conjunction Elimination are needed to extract P as a standalone statement?",
+    options: [
+      { letter: "A", text: "Three applications.", correct: true },
+      { letter: "B", text: "One application, since P is part of the original conjunction.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. Step 1: ((P ∧ Q) ∧ R) ∧ S → gives (P ∧ Q) ∧ R and S. Step 2: (P ∧ Q) ∧ R → gives P ∧ Q and R. Step 3: P ∧ Q → gives P and Q. Three layers, three eliminations.",
+      wrong: "Each application of Conjunction Elimination peels exactly one layer. P is nested three levels deep in ((P ∧ Q) ∧ R) ∧ S, so it takes three sequential applications to reach it as a standalone statement."
+    }
+  },
+  {
+    tag: "Scientific Reasoning · Mixed",
+    premises: [
+      { label: "Known", text: "The compound is water-soluble and the compound is thermally stable." },
+      { label: "Rule", text: "If the compound is thermally stable, it can be used in high-temperature environments." }
+    ],
+    question: "Using Conjunction Elimination and then Modus Ponens, what can we conclude?",
+    options: [
+      { letter: "A", text: "The compound can be used in high-temperature environments.", correct: true },
+      { letter: "B", text: "We cannot conclude anything further without knowing both properties together.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. First, Conjunction Elimination extracts 'the compound is thermally stable' from the compound statement. Then Modus Ponens fires: thermal stability → usable in high-temperature environments, and thermal stability is confirmed. Therefore the compound can be used in high-temperature environments. Two rules, one chain.",
+      wrong: "Conjunction Elimination frees individual conjuncts for independent use. Once thermal stability is extracted as a standalone fact, it can serve as the antecedent in the conditional, allowing Modus Ponens to produce the conclusion."
+    }
+  },
+  {
+    tag: "Everyday Reasoning · Compound",
+    premises: [
+      { label: "Known", text: "The applicant has a valid license, has passed the background check, and has completed the required training." }
+    ],
+    question: "The licensing board needs to verify training completion independently. What does Conjunction Elimination allow?",
+    options: [
+      { letter: "A", text: "'The applicant has completed the required training' can be extracted as a standalone verified fact.", correct: true },
+      { letter: "B", text: "Training completion cannot be verified alone — all three facts must be presented together.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. The compound statement is a three-part conjunction. Conjunction Elimination allows any individual component to be extracted and treated as an independent verified fact. Training completion stands entirely on its own once the conjunction is established.",
+      wrong: "Conjunction Elimination is specifically designed to isolate components of compound statements. Each conjunct — the license, the background check, and the training — can be independently extracted and used. No rule requires them to always travel together."
+    }
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function renderQuestion() {
+  const p = problems[current];
+  const area = document.getElementById('question-area');
+  answered = false;
+
+  const premiseHTML = p.premises.map(pr =>
+    `<div class="premise">
+      <span class="premise-label">${pr.label}</span>
+      <span class="premise-text">${pr.text}</span>
+    </div>`
+  ).join('');
+
+  const optionHTML = p.options.map((o, i) =>
+    `<button class="option-btn" data-index="${i}" onclick="selectOption(this, ${o.correct}, ${i})">
+      <span class="option-letter">${o.letter}</span>
+      <span>${o.text}</span>
+    </button>`
+  ).join('');
+
+  area.innerHTML = `
+    <div class="card">
+      <div class="card-tag">${p.tag}</div>
+      <div class="premises">${premiseHTML}</div>
+      <div class="divider"></div>
+      <div class="question-label">${p.question}</div>
+      <div class="options">${optionHTML}</div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+        ${current < problems.length - 1 ? 'Next Question →' : 'See Results →'}
+      </button>
+    </div>`;
+
+  updateProgress();
+}
+
+function selectOption(btn, correct, idx) {
+  if (answered) return;
+  answered = true;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    const isCorrect = problems[current].options[i].correct;
+    if (isCorrect) b.classList.add('correct');
+    else if (i === idx && !correct) b.classList.add('wrong');
+    else b.classList.add('dimmed');
+  });
+
+  const fb = document.getElementById('feedback');
+  const p = problems[current];
+  if (correct) {
+    score++;
+    fb.className = 'feedback correct';
+    fb.innerHTML = `<strong>✓ Correct</strong>${p.feedback.correct}`;
+  } else {
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `<strong>✗ Not quite</strong>${p.feedback.wrong}`;
+  }
+
+  document.getElementById('next-btn').classList.add('visible');
+  document.getElementById('score-text').textContent = `Score: ${score}`;
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= problems.length) {
+    showScore();
+  } else {
+    renderQuestion();
+  }
+}
+
+function updateProgress() {
+  const pct = (current / problems.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Question ${current + 1} of ${problems.length}`;
+}
+
+function showScore() {
+  const wrong = problems.length - score;
+  const pct = Math.round((score / problems.length) * 100);
+  const emoji = pct === 100 ? '🎯' : pct >= 60 ? '✅' : '🔄';
+  const msg = pct === 100 ? 'Perfect reasoning.' : pct >= 60 ? 'Solid logical thinking.' : 'Keep working on it.';
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = 'Complete';
+
+  document.getElementById('question-area').innerHTML = `
+    <div class="score-screen">
+      <div class="score-emoji">${emoji}</div>
+      <div class="score-number">${pct}%</div>
+      <div class="score-label">${msg}</div>
+      <div class="score-detail">
+        <div class="score-stat">
+          <div class="score-stat-num g">${score}</div>
+          <div class="score-stat-label">Correct</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num r">${wrong}</div>
+          <div class="score-stat-label">Incorrect</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num">${problems.length}</div>
+          <div class="score-stat-label">Total</div>
+        </div>
+      </div>
+      <br>
+      <button class="restart-btn" onclick="restart()">Try Again</button>
+    </div>`;
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  document.getElementById('score-text').textContent = 'Score: 0';
+  renderQuestion();
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+  const isLight = root.classList.toggle('light');
+  btn.textContent = isLight ? '☀️' : '🌙';
+}
+
+function toggleProfile(e) {
+  e.stopPropagation();
+  document.getElementById('nav-user').classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('nav-user').classList.remove('open');
+});
+
+renderQuestion();
+</script>
+</body>
+</html>
