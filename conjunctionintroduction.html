@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reazyn — Conjunction Introduction</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e11;
+    --surface: #1a1820;
+    --surface2: #22202a;
+    --border: #2e2b38;
+    --accent: #c8b8ff;
+    --accent2: #7c5cbf;
+    --accent-glow: rgba(200, 184, 255, 0.15);
+    --text: #ede9f6;
+    --text-dim: #8b8499;
+    --text-dimmer: #4f4a5c;
+    --green: #6fefb8;
+    --red: #ff7b7b;
+    --correct-bg: rgba(111, 239, 184, 0.08);
+    --wrong-bg: rgba(255, 123, 123, 0.08);
+    --nav-bg: rgba(15, 14, 17, 0.85);
+  }
+
+  :root.light {
+    --bg: #f5f3f9;
+    --surface: #ffffff;
+    --surface2: #ede9f6;
+    --border: #d9d3eb;
+    --accent: #6b45b8;
+    --accent2: #9270d8;
+    --accent-glow: rgba(107, 69, 184, 0.1);
+    --text: #1a1626;
+    --text-dim: #5a5270;
+    --text-dimmer: #9b93b0;
+    --green: #1a8a5a;
+    --red: #cc3333;
+    --correct-bg: rgba(26, 138, 90, 0.08);
+    --wrong-bg: rgba(204, 51, 51, 0.08);
+    --nav-bg: rgba(245, 243, 249, 0.9);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 70% -10%, rgba(124, 92, 191, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(200, 184, 255, 0.06) 0%, transparent 60%);
+  }
+
+  :root.light body {
+    background-image:
+      radial-gradient(ellipse 60% 40% at 70% -10%, rgba(146, 112, 216, 0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(107, 69, 184, 0.05) 0%, transparent 60%);
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 2rem;
+  }
+
+  .nav-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: all 0.18s;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-links a:hover { color: var(--text); background: var(--surface2); }
+  .nav-links a.active { color: var(--accent); background: var(--accent-glow); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-left: auto;
+  }
+
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent2); color: var(--accent); background: var(--accent-glow); }
+
+  .nav-user {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .nav-user:hover, .nav-user.open { background: var(--surface2); border-color: var(--border); }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 600;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .profile-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 200;
+    overflow: hidden;
+    animation: dropIn 0.18s ease forwards;
+  }
+
+  :root:not(.light) .profile-dropdown { box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .nav-user.open .profile-dropdown { display: block; }
+
+  .dropdown-header { padding: 0.9rem 1rem 0.7rem; border-bottom: 1px solid var(--border); }
+  .dropdown-name { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .dropdown-handle { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-dimmer); margin-top: 0.15rem; }
+  .dropdown-items { padding: 0.4rem 0; }
+
+  .dropdown-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem; color: var(--text-dim);
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    text-decoration: none;
+  }
+
+  .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+
+  .dropdown-item.signout { border-top: 1px solid var(--border); margin-top: 0.3rem; color: var(--red); }
+  .dropdown-item.signout:hover { background: rgba(204,51,51,0.06); color: var(--red); }
+  .dropdown-icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
+  /* MAIN */
+  main { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+  .section-header { margin-bottom: 2.5rem; }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .section-desc {
+    margin-top: 0.7rem;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    max-width: 540px;
+  }
+
+  .progress-bar-wrap { margin-bottom: 2.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; color: var(--text-dimmer);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.35s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 1.2rem;
+  }
+
+  .premises { margin-bottom: 1.5rem; }
+
+  .premise { display: flex; gap: 0.9rem; align-items: baseline; margin-bottom: 0.7rem; }
+
+  .premise-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dimmer);
+    min-width: 3.5rem;
+    flex-shrink: 0;
+  }
+
+  .premise-text { font-size: 0.95rem; color: var(--text); line-height: 1.55; font-weight: 400; }
+
+  .premise-text em {
+    font-style: italic;
+    color: var(--accent);
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05em;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 1.3rem 0; }
+
+  .question-label { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 1rem; font-weight: 500; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer; text-align: left;
+    transition: all 0.18s;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; line-height: 1.5;
+    width: 100%;
+  }
+
+  .option-btn:hover:not(:disabled) { border-color: var(--accent2); background: var(--accent-glow); transform: translateY(-1px); }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { border-color: var(--green); background: var(--correct-bg); color: var(--green); }
+  .option-btn.wrong { border-color: var(--red); background: var(--wrong-bg); color: var(--red); opacity: 0.7; }
+  .option-btn.dimmed { opacity: 0.4; }
+
+  .option-letter {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    min-width: 1.4rem; height: 1.4rem;
+    border-radius: 4px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    transition: all 0.18s;
+  }
+
+  .option-btn.correct .option-letter { background: var(--green); color: var(--bg); }
+  .option-btn.wrong .option-letter { background: var(--red); color: var(--bg); }
+
+  .feedback {
+    margin-top: 1.2rem; padding: 1rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.88rem; line-height: 1.6;
+    display: none;
+    animation: fadeUp 0.25s ease forwards;
+  }
+
+  .feedback.correct {
+    background: var(--correct-bg);
+    border: 1px solid rgba(111, 239, 184, 0.2);
+    color: #a0f5d4; display: block;
+  }
+
+  :root.light .feedback.correct { color: var(--green); border-color: rgba(26, 138, 90, 0.25); }
+
+  .feedback.wrong {
+    background: var(--wrong-bg);
+    border: 1px solid rgba(255, 123, 123, 0.2);
+    color: #ffb0b0; display: block;
+  }
+
+  .feedback strong { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+
+  .next-btn {
+    margin-top: 1.5rem; padding: 0.75rem 1.8rem;
+    border-radius: 8px;
+    background: var(--accent); color: var(--bg);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; display: none;
+    transition: all 0.18s;
+    letter-spacing: 0.02em;
+  }
+
+  .next-btn:hover { background: #ddd0ff; transform: translateY(-1px); }
+  .next-btn.visible { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+  .score-screen {
+    text-align: center; padding: 3rem 2rem;
+    animation: fadeUp 0.4s ease forwards; opacity: 0;
+  }
+
+  .score-emoji { font-size: 3rem; margin-bottom: 1rem; }
+
+  .score-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem; color: var(--accent);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+
+  .score-label { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .score-detail {
+    display: inline-flex; gap: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 2rem; margin-bottom: 2rem;
+  }
+
+  .score-stat { text-align: center; }
+  .score-stat-num { font-family: 'DM Mono', monospace; font-size: 1.3rem; font-weight: 500; }
+  .score-stat-num.g { color: var(--green); }
+  .score-stat-num.r { color: var(--red); }
+  .score-stat-label { font-size: 0.75rem; color: var(--text-dimmer); margin-top: 0.2rem; }
+
+  .restart-btn {
+    padding: 0.8rem 2.2rem; border-radius: 8px;
+    background: var(--accent); color: var(--bg);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.18s;
+  }
+
+  .restart-btn:hover { background: #ddd0ff; }
+
+  .rule-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.83rem; color: var(--text-dim); line-height: 1.6;
+  }
+
+  .rule-box strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.08em;
+    color: var(--accent2); text-transform: uppercase;
+    display: block; margin-bottom: 0.35rem;
+  }
+
+  .rule-box code { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--accent); }
+
+  nav, .card, .option-btn, .rule-box, .score-detail, .feedback,
+  .next-btn, .restart-btn, .progress-bar, .theme-toggle {
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="https://daj0n.github.io/Reazyn/index.html">Reazyn</a>
+  <ul class="nav-links">
+    <li><a href="https://daj0n.github.io/Reazyn/index.html" class="active">Play</a></li>
+    <li><a href="#">Learn</a></li>
+    <li><a href="#">Community</a></li>
+    <li><a href="https://daj0n.github.io/Reazyn/leaderboard.html">Leaderboard</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    <div class="nav-user" id="nav-user" onclick="toggleProfile(event)">
+      <div class="avatar">TU</div>
+      Test User
+      <div class="profile-dropdown" id="profile-dropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-name">Test User</div>
+          <div class="dropdown-handle">@testuser</div>
+        </div>
+        <div class="dropdown-items">
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👤</span> Profile</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">👥</span> Friends</a>
+          <a href="#" class="dropdown-item"><span class="dropdown-icon">💬</span> Chats</a>
+          <a href="#" class="dropdown-item signout"><span class="dropdown-icon">↩</span> Sign out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="section-header">
+    <h1 class="section-title">Conjunction Introduction</h1>
+    <p class="section-desc">If P is true and Q is true independently, we are justified in asserting them together as a single combined claim. This rule scales — you can conjoin any number of individually confirmed statements.</p>
+  </div>
+
+  <div class="rule-box">
+    <strong>The Rule</strong>
+    If <code>P</code> is true, and <code>Q</code> is true, then we can conclude <code>P ∧ Q</code> (P and Q). Both statements must be independently established before they can be joined. The rule extends: if R is also true, then <code>(P ∧ Q) ∧ R</code> follows as well.
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span id="progress-text">Question 1 of 10</span>
+      <span id="score-text">Score: 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="question-area"></div>
+</main>
+
+<script>
+const problems = [
+  {
+    tag: "Abstract · Formal Logic",
+    premises: [
+      { label: "Given", text: "<em>P</em> is true." },
+      { label: "Given", text: "<em>Q</em> is true." }
+    ],
+    question: "What can we conclude using Conjunction Introduction?",
+    options: [
+      { letter: "A", text: "P ∧ Q (P and Q are both true).", correct: true },
+      { letter: "B", text: "P → Q (P implies Q).", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. Both P and Q are independently confirmed, so we are fully justified in asserting P ∧ Q. This is the basic form of Conjunction Introduction.",
+      wrong: "P → Q is a conditional — it means 'if P then Q,' which is a different relationship entirely. Conjunction Introduction simply joins two confirmed truths into one compound statement."
+    }
+  },
+  {
+    tag: "Abstract · Formal Logic",
+    premises: [
+      { label: "Given", text: "<em>P</em> is true." },
+      { label: "Given", text: "<em>Q</em> is true." },
+      { label: "Given", text: "<em>R</em> is true." }
+    ],
+    question: "Which of the following can we conclude?",
+    options: [
+      { letter: "A", text: "We can only assert P ∧ Q, since R was added later.", correct: false },
+      { letter: "B", text: "(P ∧ Q) ∧ R — all three can be conjoined.", correct: true }
+    ],
+    feedback: {
+      correct: "Correct. Conjunction Introduction is not limited to two statements. Since P, Q, and R are all independently true, we can first form P ∧ Q, and then conjoin that with R to get (P ∧ Q) ∧ R.",
+      wrong: "There is no ordering restriction in Conjunction Introduction. The rule applies to any number of individually confirmed truths. All three can be joined together."
+    }
+  },
+  {
+    tag: "Abstract · Grouping",
+    premises: [
+      { label: "Given", text: "<em>P</em> is true." },
+      { label: "Given", text: "<em>Q</em> is true." },
+      { label: "Given", text: "<em>R</em> is true." },
+      { label: "Given", text: "<em>S</em> is true." }
+    ],
+    question: "We want to form a single compound statement. Which grouping is valid?",
+    options: [
+      { letter: "A", text: "((P ∧ Q) ∧ R) ∧ S", correct: true },
+      { letter: "B", text: "P ∧ (Q → R) ∧ S", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. Each conjunction is applied step by step to individually confirmed truths: P ∧ Q first, then ∧ R, then ∧ S. The grouping is valid because every component was independently established.",
+      wrong: "Q → R is a conditional, not a conjunction. Conjunction Introduction only allows you to join statements that are individually known to be true — not introduce new logical relationships between them."
+    }
+  },
+  {
+    tag: "Everyday Reasoning",
+    premises: [
+      { label: "Fact 1", text: "The meeting is scheduled for 3pm." },
+      { label: "Fact 2", text: "The conference room is available at 3pm." }
+    ],
+    question: "What can we now assert as a single combined claim?",
+    options: [
+      { letter: "A", text: "The meeting is scheduled for 3pm and the conference room is available at 3pm.", correct: true },
+      { letter: "B", text: "Because the room is available, the meeting will definitely happen.", correct: false }
+    ],
+    feedback: {
+      correct: "Exactly. Both facts are independently confirmed, so Conjunction Introduction lets us state them together as one compound fact. This is how we build a fuller picture from separate pieces of information.",
+      wrong: "That conclusion goes beyond what the premises establish. Whether the meeting happens depends on more than scheduling and room availability. Conjunction Introduction only joins confirmed facts — it doesn't add causal force between them."
+    }
+  },
+  {
+    tag: "Medical Reasoning",
+    premises: [
+      { label: "Finding 1", text: "The patient's blood pressure is elevated." },
+      { label: "Finding 2", text: "The patient's cholesterol is above the normal range." }
+    ],
+    question: "What can the physician now document as a single clinical statement?",
+    options: [
+      { letter: "A", text: "The patient's blood pressure is elevated, therefore their cholesterol is high.", correct: false },
+      { letter: "B", text: "The patient has elevated blood pressure and elevated cholesterol.", correct: true }
+    ],
+    feedback: {
+      correct: "Correct. Both findings are confirmed independently. The physician can now document them together as a single compound clinical observation using Conjunction Introduction.",
+      wrong: "The word 'therefore' implies one caused or led to the other — that is a causal inference, not a conjunction. Conjunction Introduction simply records that both conditions are present, not that one explains the other."
+    }
+  },
+  {
+    tag: "Legal Reasoning",
+    premises: [
+      { label: "Established", text: "The defendant was present at the location." },
+      { label: "Established", text: "The defendant had motive." },
+      { label: "Established", text: "The defendant had opportunity." }
+    ],
+    question: "What compound claim can the prosecutor now assert?",
+    options: [
+      { letter: "A", text: "The defendant was present, had motive, and had opportunity.", correct: true },
+      { letter: "B", text: "Because all three are true, the defendant is guilty.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. Each of the three facts has been independently established, so Conjunction Introduction allows the prosecutor to assert all three together as a compound claim. This is the foundation of building a case from evidence.",
+      wrong: "Guilt requires much more than the presence of these three facts. Conjunction Introduction only permits combining confirmed statements — it does not produce a verdict. The logical leap to 'guilty' is not licensed by this rule."
+    }
+  },
+  {
+    tag: "Abstract · Grouping",
+    premises: [
+      { label: "Given", text: "<em>P</em> is true." },
+      { label: "Given", text: "<em>Q</em> is true." },
+      { label: "Given", text: "<em>R</em> is true." }
+    ],
+    question: "A student writes: 'Since P and Q are true, and R is true, P ∧ (Q ∧ R) follows.' Is this valid?",
+    options: [
+      { letter: "A", text: "No — you must always group left to right: (P ∧ Q) ∧ R.", correct: false },
+      { letter: "B", text: "Yes — the grouping can go either way because conjunction is associative.", correct: true }
+    ],
+    feedback: {
+      correct: "Correct. Conjunction is associative — (P ∧ Q) ∧ R and P ∧ (Q ∧ R) are logically equivalent. Both groupings express the same compound truth. The order of grouping does not change what is being asserted.",
+      wrong: "There is no rule requiring left-to-right grouping. Association tells us that how we group a conjunction does not affect its truth. Both arrangements are valid applications of Conjunction Introduction."
+    }
+  },
+  {
+    tag: "Scientific Observation",
+    premises: [
+      { label: "Observation 1", text: "The water sample contains lead at levels above the safety threshold." },
+      { label: "Observation 2", text: "The water sample contains arsenic at levels above the safety threshold." },
+      { label: "Observation 3", text: "The water sample shows bacterial contamination." }
+    ],
+    question: "What is the most accurate single compound statement the researcher can now assert?",
+    options: [
+      { letter: "A", text: "The water is contaminated with lead and arsenic, and therefore bacterial contamination followed.", correct: false },
+      { letter: "B", text: "The water sample contains elevated lead, elevated arsenic, and bacterial contamination.", correct: true }
+    ],
+    feedback: {
+      correct: "Correct. All three findings are independently observed, so Conjunction Introduction lets the researcher combine them into one compound statement. No causal order is implied — only that all three are true.",
+      wrong: "The word 'therefore' introduces a causal claim not supported by the premises. The three observations are independent findings. Conjunction Introduction joins them without implying that one caused another."
+    }
+  },
+  {
+    tag: "Abstract · Conditional Interaction",
+    premises: [
+      { label: "Given", text: "<em>P</em> is true." },
+      { label: "Given", text: "<em>Q</em> is true." },
+      { label: "Separate rule", text: "If <em>P ∧ Q</em>, then <em>R</em>." }
+    ],
+    question: "Using Conjunction Introduction and then Modus Ponens, what can we ultimately conclude?",
+    options: [
+      { letter: "A", text: "R is true.", correct: true },
+      { letter: "B", text: "We cannot conclude R — we would need P and Q stated together from the start.", correct: false }
+    ],
+    feedback: {
+      correct: "Correct. First, Conjunction Introduction gives us P ∧ Q from the two separate givens. Then, the conditional 'If P ∧ Q then R' combined with the now-established P ∧ Q allows Modus Ponens to fire — giving us R. This is how the rules chain together.",
+      wrong: "P and Q do not need to be stated together originally. Conjunction Introduction is specifically designed to combine separately confirmed truths into a compound form, which can then serve as the antecedent of a conditional."
+    }
+  },
+  {
+    tag: "Everyday Reasoning · Compound",
+    premises: [
+      { label: "Fact 1", text: "The flight is on time." },
+      { label: "Fact 2", text: "The passport is valid." },
+      { label: "Fact 3", text: "The visa has been approved." },
+      { label: "Fact 4", text: "The luggage is within the weight limit." }
+    ],
+    question: "Which statement correctly applies Conjunction Introduction to all four facts?",
+    options: [
+      { letter: "A", text: "The flight being on time means the other three conditions are also satisfied.", correct: false },
+      { letter: "B", text: "The flight is on time, the passport is valid, the visa is approved, and the luggage is within the weight limit.", correct: true }
+    ],
+    feedback: {
+      correct: "Exactly. All four facts are independently confirmed, and Conjunction Introduction lets us assert them together as one compound statement. This is a clean, complete application of the rule across four components — ((Fact1 ∧ Fact2) ∧ Fact3) ∧ Fact4.",
+      wrong: "The first fact does not imply or cause the others. Each condition is independently established. Conjunction Introduction joins confirmed truths — it does not create dependency or implication between them."
+    }
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function renderQuestion() {
+  const p = problems[current];
+  const area = document.getElementById('question-area');
+  answered = false;
+
+  const premiseHTML = p.premises.map(pr =>
+    `<div class="premise">
+      <span class="premise-label">${pr.label}</span>
+      <span class="premise-text">${pr.text}</span>
+    </div>`
+  ).join('');
+
+  const optionHTML = p.options.map((o, i) =>
+    `<button class="option-btn" data-index="${i}" onclick="selectOption(this, ${o.correct}, ${i})">
+      <span class="option-letter">${o.letter}</span>
+      <span>${o.text}</span>
+    </button>`
+  ).join('');
+
+  area.innerHTML = `
+    <div class="card">
+      <div class="card-tag">${p.tag}</div>
+      <div class="premises">${premiseHTML}</div>
+      <div class="divider"></div>
+      <div class="question-label">${p.question}</div>
+      <div class="options">${optionHTML}</div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+        ${current < problems.length - 1 ? 'Next Question →' : 'See Results →'}
+      </button>
+    </div>`;
+
+  updateProgress();
+}
+
+function selectOption(btn, correct, idx) {
+  if (answered) return;
+  answered = true;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    const isCorrect = problems[current].options[i].correct;
+    if (isCorrect) b.classList.add('correct');
+    else if (i === idx && !correct) b.classList.add('wrong');
+    else b.classList.add('dimmed');
+  });
+
+  const fb = document.getElementById('feedback');
+  const p = problems[current];
+  if (correct) {
+    score++;
+    fb.className = 'feedback correct';
+    fb.innerHTML = `<strong>✓ Correct</strong>${p.feedback.correct}`;
+  } else {
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `<strong>✗ Not quite</strong>${p.feedback.wrong}`;
+  }
+
+  document.getElementById('next-btn').classList.add('visible');
+  document.getElementById('score-text').textContent = `Score: ${score}`;
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= problems.length) {
+    showScore();
+  } else {
+    renderQuestion();
+  }
+}
+
+function updateProgress() {
+  const pct = (current / problems.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Question ${current + 1} of ${problems.length}`;
+}
+
+function showScore() {
+  const wrong = problems.length - score;
+  const pct = Math.round((score / problems.length) * 100);
+  const emoji = pct === 100 ? '🎯' : pct >= 60 ? '✅' : '🔄';
+  const msg = pct === 100 ? 'Perfect reasoning.' : pct >= 60 ? 'Solid logical thinking.' : 'Keep working on it.';
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = 'Complete';
+
+  document.getElementById('question-area').innerHTML = `
+    <div class="score-screen">
+      <div class="score-emoji">${emoji}</div>
+      <div class="score-number">${pct}%</div>
+      <div class="score-label">${msg}</div>
+      <div class="score-detail">
+        <div class="score-stat">
+          <div class="score-stat-num g">${score}</div>
+          <div class="score-stat-label">Correct</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num r">${wrong}</div>
+          <div class="score-stat-label">Incorrect</div>
+        </div>
+        <div class="score-stat">
+          <div class="score-stat-num">${problems.length}</div>
+          <div class="score-stat-label">Total</div>
+        </div>
+      </div>
+      <br>
+      <button class="restart-btn" onclick="restart()">Try Again</button>
+    </div>`;
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  document.getElementById('score-text').textContent = 'Score: 0';
+  renderQuestion();
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+  const isLight = root.classList.toggle('light');
+  btn.textContent = isLight ? '☀️' : '🌙';
+}
+
+function toggleProfile(e) {
+  e.stopPropagation();
+  document.getElementById('nav-user').classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+  document.getElementById('nav-user').classList.remove('open');
+});
+
+renderQuestion();
+</script>
+</body>
+</html>
